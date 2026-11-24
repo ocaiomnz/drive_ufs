@@ -1,0 +1,16 @@
+<% const brandSize = typeof small !== 'undefined' && small ? 'brand--sm' : ''; %>
+<span class="brand <%= brandSize %>">
+  <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="ufsGrad" x1="8" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#4285F4"/>
+        <stop offset="0.45" stop-color="#1a73e8"/>
+        <stop offset="1" stop-color="#0b57d0"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#ufsGrad)" d="M24 4 L42 14.5 V33.5 L24 44 L6 33.5 V14.5 Z"/>
+    <path fill="#fff" fill-opacity="0.92" d="M16 28.5 V19.5 L24 15 L32 19.5 V28.5 L24 33 Z"/>
+    <path fill="#1a73e8" d="M24 19.2 L28.8 21.9 V27.1 L24 29.8 L19.2 27.1 V21.9 Z"/>
+  </svg>
+  <span class="brand-text"><%= typeof appName !== 'undefined' ? appName : 'UFS DRIVE' %></span>
+</span>

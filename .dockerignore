@@ -1,0 +1,13 @@
+node_modules
+storage
+npm-debug.log
+.env
+.git
+.gitignore
+.cursor
+deploy
+letsride.md
+*.md
+Dockerfile
+docker-compose*.yml
+.dockerignore

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <%- include('partials/head', {
+    title: appName,
+    description: appName + ' — armazenamento de arquivos com portas de sync',
+  }) %>
+</head>
+<body class="page-home">
+  <div class="home-shell">
+    <header class="home-top">
+      <%- include('partials/brand') %>
+      <nav class="home-nav">
+        <a class="nav-link" href="/drive">Meus arquivos</a>
+        <a class="btn btn-primary" href="/drive#enviar">Enviar</a>
+      </nav>
+    </header>
+
+    <main class="home-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Armazenamento distribuído</p>
+        <h1 class="hero-title"><%= appName %></h1>
+        <p class="hero-sub"><%= appTagline %></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="/drive#enviar">Abrir o drive</a>
+          <a class="btn btn-ghost btn-lg" href="/admin">Administração</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="drive-window">
+          <div class="drive-window-bar">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="drive-window-body">
+            <div class="fake-row"><i></i><b>Relatório.pdf</b><em>2,1 MB</em></div>
+            <div class="fake-row"><i></i><b>Fotos campo</b><em>pasta</em></div>
+            <div class="fake-row"><i></i><b>backup.zip</b><em>48 MB</em></div>
+            <div class="fake-ports">
+              <span class="chip">Disco local</span>
+              <span class="chip chip-blue">Google Drive</span>
+              <span class="chip">Dropbox</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <section class="home-features">
+      <article>
+        <h2>Disco do provedor</h2>
+        <p>Arquivos ficam no armazenamento principal (disco ou R2), com upload assinado e pastas por usuário.</p>
+      </article>
+      <article>
+        <h2>Portas de sync</h2>
+        <p>Conecte Google Drive, Dropbox, S3 ou webhooks. Cada envio é espelhado nas portas ativas.</p>
+      </article>
+      <article>
+        <h2>Download em lote</h2>
+        <p>Baixe uma pasta ou o drive inteiro em ZIP, montado a partir dos arquivos reais.</p>
+      </article>
+    </section>
+
+    <footer class="site-foot">
+      <%- include('partials/brand', { small: true }) %>
+      <p>UFS · Sistemas Distribuídos</p>
+    </footer>
+  </div>
+
+  <%- include('partials/scripts') %>
+</body>
+</html>

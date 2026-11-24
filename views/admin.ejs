@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <%- include('partials/head', {
+    title: 'Admin — ' + appName,
+    description: 'Administração e portas de sync — ' + appName,
+  }) %>
+</head>
+<body class="page-admin">
+  <header class="admin-top">
+    <a href="/" class="admin-brand"><%- include('partials/brand', { small: true }) %></a>
+    <% if (authorized) { %>
+    <form method="post" action="/admin/sair">
+      <button type="submit" class="btn btn-ghost">Sair</button>
+    </form>
+    <% } %>
+  </header>
+
+  <main class="admin-main">
+    <% if (!authorized) { %>
+    <section class="admin-login panel">
+      <h1>Administração</h1>
+      <% if (!configured) { %>
+      <p class="form-error">Defina ADMIN_PASSWORD no .env</p>
+      <% } else { %>
+      <form method="post" action="/admin/entrar" class="login-form">
+        <div class="field">
+          <label class="field-label" for="password">Senha</label>
+          <input type="password" id="password" name="password" required autofocus>
+        </div>
+        <% if (error) { %><p class="form-error"><%= error %></p><% } %>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+      </form>
+      <% } %>
+    </section>
+    <% } else { %>
+
+    <section class="admin-hero">
+      <div>
+        <h1>Painel</h1>
+        <p><%= total %> arquivo<%= total === 1 ? '' : 's' %> · <%= folders.length %> pasta<%= folders.length === 1 ? '' : 's' %></p>
+      </div>
+      <a class="btn btn-primary" href="/admin/baixar">Baixar tudo (ZIP)</a>
+    </section>
+
+    <section class="panel ports-panel" id="ports">
+      <div class="panel-head-row">
+        <div>
+          <h2>Portas de sync</h2>
+          <p class="panel-sub">Além do disco do provedor, cada upload é espelhado nas portas ativas (Google Drive, Dropbox, S3, webhook).</p>
+        </div>
+      </div>
+
+      <div id="ports-list" class="ports-list">
+        <% if (!ports.length) { %>
+        <p class="muted">Nenhuma porta cadastrada ainda.</p>
+        <% } %>
+        <% ports.forEach(function(p) { %>
+        <article class="port-card" data-id="<%= p.id %>">
+          <div>
+            <strong><%= p.name %></strong>
+            <span class="chip <%= p.enabled ? 'chip-blue' : '' %>"><%= p.provider %></span>
+            <% if (!p.enabled) { %><span class="chip">pausada</span><% } %>
+          </div>
+          <div class="port-actions">
+            <button type="button" class="btn btn-ghost btn-sm" data-test="<%= p.id %>">Testar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-toggle="<%= p.id %>" data-enabled="<%= p.enabled ? '1' : '0' %>">
+              <%= p.enabled ? 'Pausar' : 'Ativar' %>
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm danger" data-del="<%= p.id %>">Remover</button>
+          </div>
+        </article>
+        <% }) %>
+      </div>
+
+      <form id="port-form" class="port-form">
+        <h3>Nova porta</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="port-name">Nome</label>
+            <input id="port-name" required placeholder="Backup Google">
+          </div>
+          <div class="field">
+            <label class="field-label" for="port-provider">Provedor</label>
+            <select id="port-provider" required>
+              <% providers.forEach(function(pr) { %>
+              <option value="<%= pr.id %>"><%= pr.label %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="port-config">Configuração (JSON)</label>
+          <textarea id="port-config" rows="8" spellcheck="false" placeholder='{"clientId":"...","clientSecret":"...","refreshToken":"...","folderId":"..."}'></textarea>
+          <span class="field-hint">
+            <strong>gdrive:</strong> clientId, clientSecret, refreshToken (ou serviceAccountJson) · folderId opcional<br>
+            <strong>dropbox:</strong> accessToken · folderPath opcional<br>
+            <strong>s3:</strong> accessKeyId, secretAccessKey, bucket · endpoint/region/prefix opcionais<br>
+            <strong>webhook:</strong> url · headers/fieldName opcionais
+          </span>
+        </div>
+        <p id="port-error" class="form-error" role="alert"></p>
+        <button type="submit" class="btn btn-primary">Salvar porta</button>
+      </form>
+
+      <% if (jobs && jobs.length) { %>
+      <h3 class="jobs-title">Últimos syncs</h3>
+      <div class="jobs-table-wrap">
+        <table class="jobs-table">
+          <thead>
+            <tr><th>Arquivo</th><th>Porta</th><th>Status</th><th>Quando</th></tr>
+          </thead>
+          <tbody>
+            <% jobs.forEach(function(j) { %>
+            <tr>
+              <td><%= j.filename || ('#' + j.file_id) %></td>
+              <td><%= j.port_name %> <span class="muted">(<%= j.provider %>)</span></td>
+              <td class="status-<%= j.status %>"><%= j.status %><% if (j.error_message) { %> — <%= j.error_message %><% } %></td>
+              <td><%= j.synced_at || j.created_at %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% } %>
+    </section>
+
+    <section class="panel">
+      <h2>Pastas</h2>
+      <% if (!folders.length) { %>
+      <p class="muted">Nenhum arquivo ainda.</p>
+      <% } %>
+      <% folders.forEach(function(folder) { %>
+      <details class="folder-block">
+        <summary>
+          <strong><%= folder.name %></strong>
+          <span class="muted"><%= folder.files.length %> arquivo<%= folder.files.length === 1 ? '' : 's' %></span>
+          <a class="btn btn-ghost btn-sm" href="/api/folders/<%= folder.key %>/download">ZIP</a>
+        </summary>
+        <ul class="folder-files">
+          <% folder.files.forEach(function(f) { %>
+          <li>
+            <a href="<%= f.url %>" target="_blank" rel="noopener"><%= f.filename %></a>
+            <span class="muted"><%= f.uploaded_label %></span>
+          </li>
+          <% }) %>
+        </ul>
+      </details>
+      <% }) %>
+    </section>
+    <% } %>
+  </main>
+
+  <% if (authorized) { %>
+  <script src="/js/admin-ports.js" defer></script>
+  <% } %>
+  <%- include('partials/scripts') %>
+</body>
+</html>

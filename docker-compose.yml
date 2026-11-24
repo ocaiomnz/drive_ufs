@@ -1,0 +1,52 @@
+# Ambiente local: app + MySQL, arquivos em disco
+# Uso: docker compose up --build -d
+# App:   http://localhost:3001
+# Admin: http://localhost:3001/admin  (senha admin2026)
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ufsdrive
+      MYSQL_USER: ufsdrive
+      MYSQL_PASSWORD: ufsdrive
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3311:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3001}:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      APP_NAME: UFS DRIVE
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ufsdrive
+      DB_PASSWORD: ufsdrive
+      DB_NAME: ufsdrive
+      STORAGE: disk
+      STORAGE_DIR: /data/files
+      UPLOAD_SECRET: segredo-local-de-testes
+      MAX_UPLOAD_MB: 50
+      ADMIN_PASSWORD: admin2026
+    volumes:
+      - files_data:/data/files
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  files_data:

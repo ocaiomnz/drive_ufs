@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <%- include('partials/head', {
+    title: 'Meus arquivos — ' + appName,
+    description: appName + ' — navegador de arquivos',
+  }) %>
+</head>
+<body class="page-drive">
+  <div class="drive-app">
+    <aside class="sidebar">
+      <a class="sidebar-brand" href="/">
+        <%- include('partials/brand') %>
+      </a>
+      <button type="button" class="btn btn-primary btn-block" id="sidebar-new">+ Novo</button>
+      <nav class="sidebar-nav">
+        <a class="side-link is-active" href="#galeria" data-view="all">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z" fill="currentColor"/></svg>
+          Meu drive
+        </a>
+        <a class="side-link" href="#galeria" data-view="mine" id="side-mine">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z" fill="currentColor"/></svg>
+          Minha pasta
+        </a>
+        <a class="side-link" href="/admin">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94a7.43 7.43 0 0 0 .05-1 7.43 7.43 0 0 0-.05-1l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.2 7.2 0 0 0-1.73-1L14.5 2.5a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 0-.5.5l-.37 2.54a7.2 7.2 0 0 0-1.73 1l-2.39-.96a.5.5 0 0 0-.6.22L2.5 8.72a.5.5 0 0 0 .12.64L4.65 11a7.43 7.43 0 0 0-.05 1 7.43 7.43 0 0 0 .05 1l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96a7.2 7.2 0 0 0 1.73 1l.37 2.54a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5l.37-2.54a7.2 7.2 0 0 0 1.73-1l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z" fill="currentColor"/></svg>
+          Admin &amp; portas
+        </a>
+      </nav>
+      <div class="sidebar-foot">
+        <p class="storage-hint">Principal: disco do provedor</p>
+        <p class="storage-hint muted">Espelho: portas conectadas</p>
+      </div>
+    </aside>
+
+    <div class="drive-main">
+      <header class="topbar">
+        <button type="button" class="icon-btn mobile-only" id="menu-toggle" aria-label="Menu">☰</button>
+        <div class="search-shell">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 1 0 14 15.5l.27.28v.79L19 20.5 20.5 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z" fill="currentColor"/></svg>
+          <input type="search" id="file-search" placeholder="Pesquisar no drive" autocomplete="off">
+        </div>
+        <a class="topbar-user" href="#enviar" id="user-chip">Entrar na pasta</a>
+      </header>
+
+      <main class="drive-content">
+        <section id="enviar" class="panel" data-max-bytes="<%= maxUploadBytes %>" data-max-mb="<%= maxUploadMb %>">
+          <form id="owner-form" class="owner-step" novalidate hidden>
+            <h2 class="panel-title">Quem está enviando?</h2>
+            <p class="panel-sub">Seus arquivos ficam numa pasta com o seu nome.</p>
+            <div class="field">
+              <label class="field-label" for="owner-name">Nome</label>
+              <input
+                type="text"
+                id="owner-name"
+                maxlength="120"
+                autocomplete="off"
+                autocapitalize="words"
+                placeholder="Ex.: Maria Silva"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="name-suggest"
+              >
+              <ul id="name-suggest" class="suggest" role="listbox" hidden></ul>
+            </div>
+            <p id="owner-error" class="form-error" role="alert"></p>
+            <button type="submit" class="btn btn-primary">Continuar</button>
+          </form>
+
+          <div id="upload-step" class="upload-step" hidden>
+            <div class="upload-head">
+              <div>
+                <h2 class="panel-title">Enviar arquivos</h2>
+                <p class="owner-line">
+                  Pasta de <strong id="owner-label"></strong>
+                  <button type="button" class="link-btn" id="owner-change">trocar</button>
+                </p>
+              </div>
+              <div class="pick-actions">
+                <button type="button" class="btn btn-primary" id="pick-files">Escolher arquivos</button>
+                <button type="button" class="btn btn-ghost" id="pick-camera">Câmera</button>
+              </div>
+            </div>
+            <input type="file" id="file-picker" multiple hidden>
+            <input type="file" id="file-camera" accept="image/*" capture="environment" hidden>
+            <p id="upload-summary" class="upload-summary" role="status" aria-live="polite"></p>
+            <ul id="queue" class="queue"></ul>
+          </div>
+        </section>
+
+        <section id="galeria" class="files-section" aria-labelledby="files-title">
+          <div class="files-head">
+            <h2 id="files-title" class="section-title">Meu drive</h2>
+            <div class="files-tools">
+              <span id="files-count" class="files-count"></span>
+              <div class="view-toggle" role="tablist">
+                <button type="button" class="view-tab is-active" data-layout="grid" aria-label="Grade">▦</button>
+                <button type="button" class="view-tab" data-layout="list" aria-label="Lista">☰</button>
+              </div>
+            </div>
+          </div>
+          <div class="files-tabs" role="tablist">
+            <button type="button" class="gallery-tab is-active" role="tab" data-view="all">Todos</button>
+            <button type="button" class="gallery-tab" role="tab" data-view="mine" id="tab-mine">Minha pasta</button>
+          </div>
+          <p class="my-folder-bar" id="my-folder-bar" hidden>
+            <a class="btn btn-ghost" id="my-folder-download" href="#">Baixar minha pasta (ZIP)</a>
+          </p>
+          <p id="files-empty" class="files-empty">Carregando…</p>
+          <div id="file-grid" class="file-grid"></div>
+          <p class="files-more">
+            <button type="button" class="btn btn-ghost" id="files-more" hidden>Carregar mais</button>
+          </p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="lightbox" class="lightbox" aria-label="Pré-visualização">
+    <form method="dialog" class="lightbox-close">
+      <button type="submit" class="icon-btn" aria-label="Fechar">×</button>
+    </form>
+    <img id="lb-img" alt="">
+    <div class="lightbox-meta">
+      <strong id="lb-name"></strong>
+      <span id="lb-time"></span>
+      <span id="lb-count"></span>
+      <a id="lb-open" href="#" target="_blank" rel="noopener">Abrir original</a>
+    </div>
+    <button type="button" class="lb-nav lb-prev" id="lb-prev" aria-label="Anterior">‹</button>
+    <button type="button" class="lb-nav lb-next" id="lb-next" aria-label="Próximo">›</button>
+  </dialog>
+
+  <script src="/js/drive.js" defer></script>
+  <%- include('partials/scripts') %>
+</body>
+</html>
